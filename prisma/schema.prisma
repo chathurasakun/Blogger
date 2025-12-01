@@ -1,0 +1,34 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Tenant {
+  id       String   @id @default(uuid())
+  name     String
+  domain   String   @unique
+  users    User[]
+  sessions Session[]
+}
+
+model User {
+  id       String    @id @default(uuid())
+  email    String    @unique
+  password String
+  tenantId String
+  tenant   Tenant    @relation(fields: [tenantId], references: [id])
+  sessions Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  tenantId  String
+  user      User      @relation(fields: [userId], references: [id])
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  expiresAt DateTime
+}
