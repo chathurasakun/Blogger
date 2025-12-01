@@ -1,10 +1,15 @@
 import Link from "next/link";
 import { headers } from "next/headers";
 import { getTenantByDomain } from "@/lib/tenants";
+import { getThemeColors } from "@/lib/themes";
 
 export default async function LoginPage() {
   const host = headers().get("host") ?? "";
   const tenant = host ? await getTenantByDomain(host) : null;
+  
+  // Get theme from database, fallback to "emerald" if not set
+  const themeId = tenant?.theme || null;
+  const colors = getThemeColors(themeId);
 
   // If tenant is not found for this domain, show a friendly message instead of throwing.
   if (!tenant) {
@@ -47,13 +52,13 @@ export default async function LoginPage() {
         {/* Left: Marketing / Intro */}
         <section className="space-y-6">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-slate-200 backdrop-blur">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <span className={`h-1.5 w-1.5 rounded-full ${colors.badgeBg}`} />
             Welcome back to {tenant.name}
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
             Sign in to{" "}
-            <span className="bg-gradient-to-r from-emerald-300 via-cyan-300 to-sky-400 bg-clip-text text-transparent">
-              manage your stories
+            <span className={`bg-gradient-to-r ${colors.gradientTextFrom} ${colors.gradientTextVia} ${colors.gradientTextTo} bg-clip-text text-transparent`}>
+              manage your posts
             </span>
           </h1>
           <p className="text-sm sm:text-base text-slate-300/80 leading-relaxed max-w-xl">
@@ -64,19 +69,19 @@ export default async function LoginPage() {
 
           <div className="flex flex-wrap gap-4 text-xs sm:text-sm text-slate-300/80">
             <div className="flex items-center gap-2">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400/10 text-emerald-300">
+              <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${colors.badgeBgLight} ${colors.badgeText}`}>
                 1
               </span>
               <span>Focus mode editor</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400/10 text-emerald-300">
+              <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${colors.badgeBgLight} ${colors.badgeText}`}>
                 2
               </span>
               <span>Instant previews</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-400/10 text-emerald-300">
+              <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${colors.badgeBgLight} ${colors.badgeText}`}>
                 3
               </span>
               <span>Collaborative drafts</span>
@@ -86,7 +91,7 @@ export default async function LoginPage() {
 
         {/* Right: Auth Card */}
         <section className="relative">
-          <div className="pointer-events-none absolute -inset-px rounded-3xl bg-gradient-to-br from-emerald-400/40 via-cyan-400/20 to-sky-500/40 opacity-60 blur-2xl" />
+          <div className={`pointer-events-none absolute -inset-px rounded-3xl bg-gradient-to-br ${colors.gradientFrom}/40 ${colors.gradientVia}/20 ${colors.gradientTo}/40 opacity-60 blur-2xl`} />
           <div className="relative rounded-3xl border border-white/10 bg-slate-900/80 p-6 sm:p-8 shadow-[0_18px_60px_rgba(15,23,42,0.9)] backdrop-blur-xl">
             <header className="mb-6 space-y-1">
               <h2 className="text-xl sm:text-2xl font-semibold tracking-tight">
@@ -113,7 +118,7 @@ export default async function LoginPage() {
                     type="email"
                     autoComplete="email"
                     required
-                    className="block w-full rounded-xl border border-white/10 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none ring-0 transition focus:border-emerald-400/70 focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500/60 placeholder:text-slate-500"
+                    className={`block w-full rounded-xl border border-white/10 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none ring-0 transition ${colors.inputFocusBorder} focus:bg-slate-900 focus:ring-2 ${colors.inputFocusRing} placeholder:text-slate-500`}
                     placeholder="you@example.com"
                   />
                 </div>
@@ -130,7 +135,7 @@ export default async function LoginPage() {
                   </label>
                   <button
                     type="button"
-                    className="text-xs font-medium text-emerald-300 hover:text-emerald-200 hover:underline"
+                    className={`text-xs font-medium ${colors.forgotPasswordText} ${colors.forgotPasswordHover} hover:underline`}
                   >
                     Forgot password?
                   </button>
@@ -142,7 +147,7 @@ export default async function LoginPage() {
                     type="password"
                     autoComplete="current-password"
                     required
-                    className="block w-full rounded-xl border border-white/10 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none ring-0 transition focus:border-emerald-400/70 focus:bg-slate-900 focus:ring-2 focus:ring-emerald-500/60 placeholder:text-slate-500"
+                    className={`block w-full rounded-xl border border-white/10 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none ring-0 transition ${colors.inputFocusBorder} focus:bg-slate-900 focus:ring-2 ${colors.inputFocusRing} placeholder:text-slate-500`}
                     placeholder="••••••••"
                   />
                 </div>
@@ -153,7 +158,7 @@ export default async function LoginPage() {
                 <label className="inline-flex items-center gap-2 cursor-pointer select-none">
                   <input
                     type="checkbox"
-                    className="h-3.5 w-3.5 rounded border-white/20 bg-slate-900/70 text-emerald-400 focus:ring-emerald-500/60"
+                    className={`h-3.5 w-3.5 rounded border-white/20 bg-slate-900/70 ${colors.checkboxColor} ${colors.checkboxFocusRing}`}
                   />
                   <span>Keep me signed in</span>
                 </label>
@@ -162,7 +167,7 @@ export default async function LoginPage() {
               {/* Primary action */}
               <button
                 type="submit"
-                className="inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-emerald-400 via-cyan-400 to-sky-500 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:shadow-emerald-400/40 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                className={`inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r ${colors.buttonGradient} px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg ${colors.buttonShadow} transition ${colors.buttonHoverShadow} hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 ${colors.buttonFocusRing} focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950`}
               >
                 Continue to dashboard
               </button>
@@ -180,7 +185,7 @@ export default async function LoginPage() {
                 <div className="flex flex-col sm:flex-row gap-2">
                   <Link
                     href="/signup"
-                    className="inline-flex w-full items-center justify-center rounded-xl border border-emerald-300/40 bg-transparent px-4 py-2.5 text-sm font-medium text-emerald-200 transition hover:border-emerald-300 hover:bg-emerald-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                    className={`inline-flex w-full items-center justify-center rounded-xl border ${colors.linkBorder} bg-transparent px-4 py-2.5 text-sm font-medium ${colors.linkText} transition ${colors.linkHoverBorder} ${colors.linkHoverBg} focus-visible:outline-none focus-visible:ring-2 ${colors.buttonFocusRing} focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950`}
                   >
                     Create a free account
                   </Link>
