@@ -35,16 +35,6 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  // Log session details (check your terminal/server logs)
-  console.log("Session details:", {
-    sessionId: session.id,
-    userId: session.userId,
-    tenantId: session.tenantId,
-    expiresAt: session.expiresAt,
-    userEmail: user.email,
-    tenantName: user.tenant.name,
-  });
-
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       {/* Header */}
