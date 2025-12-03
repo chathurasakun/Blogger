@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import TextField from "@/components/atoms/TextField";
 import Link from "next/link";
 import type { ThemeColors } from "@/lib/themes";
 
@@ -51,60 +52,42 @@ export default function LoginForm({ colors }: LoginFormProps) {
   return (
     <form className="space-y-5" onSubmit={handleSubmit}>
       {/* Email */}
-      <div className="space-y-1.5">
-        <label
-          htmlFor="email"
-          className="block text-xs font-medium uppercase tracking-wide text-slate-200"
-        >
-          Email
-        </label>
-        <div className="relative">
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={isLoading}
-            className={`block w-full rounded-xl border border-white/10 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none ring-0 transition ${colors.inputFocusBorder} focus:bg-slate-900 focus:ring-2 ${colors.inputFocusRing} placeholder:text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed`}
-            placeholder="you@example.com"
-          />
-        </div>
-      </div>
+      <TextField
+        label="Email"
+        colors={colors}
+        id="email"
+        name="email"
+        type="email"
+        autoComplete="email"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        disabled={isLoading}
+        placeholder="you@example.com"
+      />
 
       {/* Password */}
-      <div className="space-y-1.5">
-        <div className="flex items-center justify-between gap-2">
-          <label
-            htmlFor="password"
-            className="block text-xs font-medium uppercase tracking-wide text-slate-200"
-          >
-            Password
-          </label>
+      <TextField
+        label="Password"
+        colors={colors}
+        id="password"
+        name="password"
+        type="password"
+        autoComplete="current-password"
+        required
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        disabled={isLoading}
+        placeholder="••••••••"
+        labelAction={
           <button
             type="button"
             className={`text-xs font-medium ${colors.forgotPasswordText} ${colors.forgotPasswordHover} hover:underline`}
           >
             Forgot password?
           </button>
-        </div>
-        <div className="relative">
-          <input
-            id="password"
-            name="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={isLoading}
-            className={`block w-full rounded-xl border border-white/10 bg-slate-900/60 px-3 py-2.5 text-sm text-slate-100 outline-none ring-0 transition ${colors.inputFocusBorder} focus:bg-slate-900 focus:ring-2 ${colors.inputFocusRing} placeholder:text-slate-500 disabled:opacity-50 disabled:cursor-not-allowed`}
-            placeholder="••••••••"
-          />
-        </div>
-      </div>
+        }
+      />
 
       {/* Remember me */}
       <div className="flex items-center justify-between gap-3 text-xs text-slate-300/90">
