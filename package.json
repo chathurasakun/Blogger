@@ -8,7 +8,9 @@
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "db:health": "npx tsx prisma/test-db-connection.ts",
+    "db:query": "/opt/homebrew/opt/postgresql@16/bin/psql postgresql://blogger:bloggerpassword@localhost:5432/blogger -f prisma/query_scripts/query-users.sql"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
