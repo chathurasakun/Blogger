@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getTenantByDomain } from "@/lib/tenants";
+import { getThemeColors } from "@/lib/themes";
 import SignOutButton from "@/components/molecules/SignOutButton";
 
 export default async function DashboardPage() {
@@ -35,6 +36,10 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  // Get theme colors for consistent styling
+  const themeId = currentTenant?.theme || null;
+  const colors = getThemeColors(themeId);
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       {/* Header */}
@@ -43,7 +48,7 @@ export default async function DashboardPage() {
           <h1 className="text-xl font-semibold">Dashboard</h1>
           <div className="flex items-center gap-4">
             <span className="text-sm text-slate-300">{user.email}</span>
-            <SignOutButton />
+            <SignOutButton colors={colors} />
           </div>
         </div>
       </header>
