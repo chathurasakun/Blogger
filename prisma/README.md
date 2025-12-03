@@ -35,7 +35,7 @@ All database connections should use the `DATABASE_URL` environment variable:
 
 ```bash
 # In .env file (not committed to git)
-DATABASE_URL="postgresql://user:password@localhost:5432/blogger?schema=public"
+DATABASE_URL=*********************
 ```
 
 ## Running SQL Scripts
