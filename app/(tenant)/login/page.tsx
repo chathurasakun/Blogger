@@ -93,18 +93,7 @@ export default async function LoginPage() {
         {/* Right: Auth Card */}
         <section className="relative">
           <div className={`pointer-events-none absolute -inset-px rounded-3xl bg-gradient-to-br ${colors.gradientFrom}/40 ${colors.gradientVia}/20 ${colors.gradientTo}/40 opacity-60 blur-2xl`} />
-          <div className="relative rounded-3xl border border-white/10 bg-slate-900/80 p-6 sm:p-8 shadow-[0_18px_60px_rgba(15,23,42,0.9)] backdrop-blur-xl">
-            <header className="mb-6 space-y-1">
-              <h2 className="text-xl sm:text-2xl font-semibold tracking-tight">
-                Log in
-              </h2>
-              <p className="text-sm text-slate-300/80">
-                Enter your credentials to access your Blogger dashboard.
-              </p>
-            </header>
-
-            <LoginForm colors={colors} />
-          </div>
+          <LoginForm colors={colors} />
         </section>
       </div>
     </main>
