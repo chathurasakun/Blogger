@@ -10,7 +10,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:health": "npx tsx prisma/test-db-connection.ts",
-    "db:query": "/opt/homebrew/opt/postgresql@16/bin/psql postgresql://blogger:bloggerpassword@localhost:5432/blogger -f prisma/query_scripts/query-users.sql"
+    "db:query": "npx tsx prisma/scripts/run-query.ts prisma/query_scripts/query-users.sql"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
@@ -24,6 +24,7 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.19",
+    "dotenv": "^17.2.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.5",
     "eslint-config-prettier": "^9.1.0",
