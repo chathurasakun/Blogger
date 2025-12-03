@@ -2,7 +2,7 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { getTenantByDomain } from "@/lib/tenants";
 import { getThemeColors } from "@/lib/themes";
-import LoginForm from "@/components/LoginForm";
+import LoginForm from "@/components/organisms/LoginForm";
 
 export default async function LoginPage() {
   const host = headers().get("host") ?? "";

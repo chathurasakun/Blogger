@@ -1,4 +1,4 @@
-import Button from "./Button";
+import Button from "../atoms/Button";
 import type { ThemeColors } from "@/lib/themes";
 import type { ButtonHTMLAttributes } from "react";
 

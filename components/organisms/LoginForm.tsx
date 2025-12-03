@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import TextField from "@/components/atoms/TextField";
 import Button from "@/components/atoms/Button";
-import PrimaryActionButton from "@/components/atoms/PrimaryActionButton";
-import SecondaryActionButton from "@/components/atoms/SecondaryActionButton";
+import PrimaryActionButton from "@/components/molecules/PrimaryActionButton";
+import SecondaryActionButton from "@/components/molecules/SecondaryActionButton";
 import type { ThemeColors } from "@/lib/themes";
 
 interface LoginFormProps {

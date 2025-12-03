@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getTenantByDomain } from "@/lib/tenants";
-import SignOutButton from "@/components/SignOutButton";
+import SignOutButton from "@/components/molecules/SignOutButton";
 
 export default async function DashboardPage() {
   const session = await getSession();
