@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { getTenantByDomain } from "@/lib/tenants";
-import { prisma } from "@/lib/prisma";
+import { createPost } from "@/lib/posts";
 
 export async function POST(request: NextRequest) {
   try {
@@ -69,15 +69,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create the post
-    const post = await prisma.post.create({
-      data: {
-        title: title.trim(),
-        content: content.trim(),
-        tenantId: tenant.id,
-        userId: userId,
-        likeCount: 0,
-      },
+    // Create the post via reusable helper
+    const post = await createPost({
+      title,
+      content,
+      tenantId: tenant.id,
+      userId,
     });
 
     return NextResponse.json(
