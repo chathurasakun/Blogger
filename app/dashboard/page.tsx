@@ -7,7 +7,7 @@ import { getUserById } from "@/lib/users";
 import { getPostsByTenant } from "@/lib/posts";
 import Header from "@/components/organisms/Header";
 import CreatePostContainer from "@/components/organisms/CreatePostContainer";
-import PostsList from "@/components/organisms/PostsList";
+import PostsSection from "@/components/organisms/PostsSection";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -59,7 +59,7 @@ export default async function DashboardPage() {
           <CreatePostContainer colors={colors} />
         </div>
 
-        <PostsList colors={colors} posts={posts} currentUserId={user.id} />
+        <PostsSection colors={colors} posts={posts} currentUserId={user.id} />
       </main>
     </div>
   );
