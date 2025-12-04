@@ -6,8 +6,7 @@ import { getThemeColors } from "@/lib/themes";
 import { getUserById } from "@/lib/users";
 import { getPostsByTenant } from "@/lib/posts";
 import Header from "@/components/organisms/Header";
-import CreatePostContainer from "@/components/organisms/CreatePostContainer";
-import PostsSection from "@/components/organisms/PostsSection";
+import PostsContainer from "@/components/organisms/PostsContainer";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -48,18 +47,17 @@ export default async function DashboardPage() {
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <Header title="Dashboard" userEmail={user.email} colors={colors} />
       <main className="mx-auto max-w-7xl px-4 py-8">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
+        <div className="mb-6">
+          <div className="mb-4">
             <h2 className="text-2xl font-semibold">Welcome back!</h2>
             <p className="mt-1 text-slate-300">
               You are logged in as <strong>{user.email}</strong> from{" "}
               <strong>{user.tenant.name}</strong>.
             </p>
           </div>
-          <CreatePostContainer colors={colors} />
         </div>
 
-        <PostsSection colors={colors} posts={posts} currentUserId={user.id} />
+        <PostsContainer colors={colors} posts={posts} currentUserId={user.id} />
       </main>
     </div>
   );
