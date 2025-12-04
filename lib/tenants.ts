@@ -16,15 +16,25 @@ export async function getTenantByDomain(domain: string) {
 }
 
 export async function getAllTenants() {
-  return prisma.tenant.findMany({
-    select: {
-      id: true,
-      name: true,
-      domain: true,
-      theme: true,
-    },
-    orderBy: {
-      name: "asc",
-    },
-  });
+  try {
+    return await prisma.tenant.findMany({
+      select: {
+        id: true,
+        name: true,
+        domain: true,
+        theme: true,
+      },
+      orderBy: {
+        name: "asc",
+      },
+    });
+  } catch (error) {
+    // If database is not available (e.g., during build), return empty array
+    if (error instanceof Error && error.message.includes('DATABASE_URL')) {
+      console.warn('Database not available, returning empty tenants list');
+      return [];
+    }
+    // Re-throw other errors
+    throw error;
+  }
 }

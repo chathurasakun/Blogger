@@ -1,8 +1,19 @@
 import { getAllTenants, Tenant } from "@/lib/tenants";
 import TenantSelector from "@/components/molecules/TenantSelector";
 
+// Force dynamic rendering to avoid build-time database queries
+export const dynamic = 'force-dynamic';
+
 export default async function Home() {
-  const tenants = await getAllTenants();
+  let tenants: Tenant[] = [];
+  
+  try {
+    tenants = await getAllTenants();
+  } catch (error) {
+    // Handle case when database is not available (e.g., during build)
+    console.error('Failed to fetch tenants:', error);
+    // tenants will remain empty array, which will show the fallback message
+  }
 
   // Filter to show only tenant A and B
   // Check both name and domain for flexibility
