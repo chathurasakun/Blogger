@@ -32,11 +32,13 @@ export async function createSession(userId: string, tenantId: string) {
     },
   });
 
-  // Set cookie
+  // Set cookie with security best practices
   cookies().set("session", session.id, {
-    httpOnly: true,
-    secure: true,
+    httpOnly: true, // Prevents JavaScript access (XSS protection)
+    secure: process.env.NODE_ENV === "production", // HTTPS only in production
+    sameSite: "lax", // CSRF protection
     path: "/",
+    // Note: maxAge is handled by expiresAt in database
   });
 
   return session;
