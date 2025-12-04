@@ -10,7 +10,7 @@ export default async function DashboardPage() {
   const session = await getSession();
 
   if (!session) {
-    redirect("/login");
+    redirect("/tenant/login");
   }
 
   // Get current tenant from domain
@@ -18,13 +18,13 @@ export default async function DashboardPage() {
   const currentTenant = host ? await getTenantByDomain(host) : null;
 
   if (!currentTenant) {
-    redirect("/login");
+    redirect("/tenant/login");
   }
 
   // CRITICAL: Verify session belongs to current tenant
   if (session.tenantId !== currentTenant.id) {
     // Session belongs to different tenant - invalid for this domain
-    redirect("/login");
+    redirect("/tenant/login");
   }
 
   const user = await prisma.user.findUnique({
@@ -33,7 +33,7 @@ export default async function DashboardPage() {
   });
 
   if (!user) {
-    redirect("/login");
+    redirect("/tenant/login");
   }
 
   // Get theme colors for consistent styling

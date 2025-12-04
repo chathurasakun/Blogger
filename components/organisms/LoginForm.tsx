@@ -140,7 +140,7 @@ export default function LoginForm({ colors }: LoginFormProps) {
         <div className="space-y-2 text-center text-xs text-slate-300/90">
           <p>New to Blogger?</p>
           <div className="flex flex-col sm:flex-row gap-2">
-            <SecondaryActionButton href="/signup" colors={colors}>
+            <SecondaryActionButton href="/tenant/signup" colors={colors}>
               Create a free account
             </SecondaryActionButton>
           </div>

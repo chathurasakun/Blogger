@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 // Public routes that don't require authentication
-const publicRoutes = ["/login", "/signup"];
+const publicRoutes = ["/tenant/login", "/tenant/signup"];
 
 // Routes that require authentication
 const protectedRoutes = ["/dashboard", "/posts", "/settings"];
@@ -18,9 +18,27 @@ export function middleware(req: NextRequest) {
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set("x-tenant", tenantKey);
 
-  // Redirect root → /login
-  if (pathname === "/") {
-    return NextResponse.redirect(new URL("/login", req.url));
+  // Redirect legacy /login and /signup to /tenant/login and /tenant/signup for tenant domains
+  if (tenantKey !== "default") {
+    if (pathname === "/login") {
+      return NextResponse.redirect(new URL("/tenant/login", req.url));
+    }
+    if (pathname === "/signup") {
+      return NextResponse.redirect(new URL("/tenant/signup", req.url));
+    }
+  }
+
+  // Allow home page on base domain (localhost or non-tenant domains)
+  // Only redirect root → /tenant/login for tenant domains
+  if (pathname === "/" && tenantKey !== "default") {
+    return NextResponse.redirect(new URL("/tenant/login", req.url));
+  }
+
+  // Allow home page to be accessible on base domain
+  if (pathname === "/" && tenantKey === "default") {
+    return NextResponse.next({
+      request: { headers: requestHeaders },
+    });
   }
 
   // Check if route requires authentication
@@ -36,7 +54,7 @@ export function middleware(req: NextRequest) {
 
   // If accessing protected route without session, redirect to login
   if (isProtectedRoute && !sessionCookie) {
-    const loginUrl = new URL("/login", req.url);
+    const loginUrl = new URL("/tenant/login", req.url);
     // Preserve the original URL as a query parameter for redirect after login
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
