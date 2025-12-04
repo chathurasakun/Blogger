@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { headers } from "next/headers";
-import { getTenantByDomain } from "@/lib/tenants";
+import { getTenantByDomain, getAllTenants } from "@/lib/tenants";
 import { getThemeColors } from "@/lib/themes";
-import LoginForm from "@/components/LoginForm";
+import LoginForm from "@/components/organisms/LoginForm";
+import DomainSelector from "@/components/molecules/DomainSelector";
 
 export default async function LoginPage() {
   const host = headers().get("host") ?? "";
   const tenant = host ? await getTenantByDomain(host) : null;
+  const allTenants = await getAllTenants();
   
   // Get theme from database, fallback to "emerald" if not set
   const themeId = tenant?.theme || null;
@@ -36,7 +38,7 @@ export default async function LoginPage() {
               Go to homepage
             </Link>
             <Link
-              href="/signup"
+              href="/tenant/signup"
               className="inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-emerald-400 via-cyan-400 to-sky-500 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:shadow-emerald-400/40 hover:brightness-110"
             >
               Create a workspace
@@ -49,6 +51,15 @@ export default async function LoginPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-slate-100 flex items-center justify-center px-4 py-10">
+      {/* Domain Selector - Top Right */}
+      <div className="fixed top-4 right-4 z-30">
+        <DomainSelector
+          tenants={allTenants}
+          currentDomain={host}
+          currentPath="/tenant/login"
+        />
+      </div>
+
       <div className="w-full max-w-5xl grid gap-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] items-center">
         {/* Left: Marketing / Intro */}
         <section className="space-y-6">
@@ -93,18 +104,7 @@ export default async function LoginPage() {
         {/* Right: Auth Card */}
         <section className="relative">
           <div className={`pointer-events-none absolute -inset-px rounded-3xl bg-gradient-to-br ${colors.gradientFrom}/40 ${colors.gradientVia}/20 ${colors.gradientTo}/40 opacity-60 blur-2xl`} />
-          <div className="relative rounded-3xl border border-white/10 bg-slate-900/80 p-6 sm:p-8 shadow-[0_18px_60px_rgba(15,23,42,0.9)] backdrop-blur-xl">
-            <header className="mb-6 space-y-1">
-              <h2 className="text-xl sm:text-2xl font-semibold tracking-tight">
-                Log in
-              </h2>
-              <p className="text-sm text-slate-300/80">
-                Enter your credentials to access your Blogger dashboard.
-              </p>
-            </header>
-
-            <LoginForm colors={colors} />
-          </div>
+          <LoginForm colors={colors} />
         </section>
       </div>
     </main>

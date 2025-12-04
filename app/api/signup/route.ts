@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/auth";
 import { getTenantByDomain } from "@/lib/tenants";
-import { comparePassword } from "@/lib/password";
+import { hashPassword, validatePassword } from "@/lib/password";
 import { checkRateLimit, getClientIdentifier } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
@@ -17,21 +17,39 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Rate limiting: 5 attempts per 5 minutes per IP
+    // Validate password strength
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.isValid) {
+      return NextResponse.json(
+        { error: passwordValidation.error },
+        { status: 400 }
+      );
+    }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: "Invalid email format" },
+        { status: 400 }
+      );
+    }
+
+    // Rate limiting: 3 signups per 15 minutes per IP
     const clientId = getClientIdentifier(request);
-    const rateLimit = checkRateLimit(clientId, 5, 5 * 60 * 1000);
+    const rateLimit = checkRateLimit(clientId, 3, 15 * 60 * 1000);
     
     if (!rateLimit.allowed) {
       return NextResponse.json(
         { 
-          error: "Too many login attempts. Please try again in 5 mins.",
+          error: "Too many signup attempts. Please try again in 15 mins.",
           retryAfter: Math.ceil((rateLimit.resetTime - Date.now()) / 1000)
         },
         { 
           status: 429,
           headers: {
             "Retry-After": Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),
-            "X-RateLimit-Limit": "5",
+            "X-RateLimit-Limit": "3",
             "X-RateLimit-Remaining": "0",
             "X-RateLimit-Reset": rateLimit.resetTime.toString(),
           }
@@ -50,41 +68,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find user by email
-    const user = await prisma.user.findUnique({
+    // Check if user already exists
+    const existingUser = await prisma.user.findUnique({
       where: { email },
     });
 
-    if (!user) {
+    if (existingUser) {
       return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 }
+        { error: "User with this email already exists" },
+        { status: 409 }
       );
     }
 
-    // Compare hashed password
-    const isPasswordValid = await comparePassword(password, user.password);
-    if (!isPasswordValid) {
-      return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 }
-      );
-    }
+    // Hash password before saving
+    const hashedPassword = await hashPassword(password);
 
-    // CRITICAL: Verify user belongs to the current tenant
-    if (user.tenantId !== tenant.id) {
-      return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 }
-      );
-    }
+    // Create new user
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password: hashedPassword,
+        tenantId: tenant.id,
+      },
+    });
 
     // Create tenant-scoped session
     await createSession(user.id, user.tenantId);
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("Login error:", error);
+    console.error("Sign up error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
