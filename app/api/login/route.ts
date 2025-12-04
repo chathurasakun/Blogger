@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/auth";
 import { getTenantByDomain } from "@/lib/tenants";
 import { comparePassword } from "@/lib/password";
 import { checkRateLimit, getClientIdentifier } from "@/lib/rate-limit";
+import { getUserByEmail } from "@/lib/users";
 
 export async function POST(request: NextRequest) {
   try {
@@ -51,9 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Find user by email
-    const user = await prisma.user.findUnique({
-      where: { email },
-    });
+    const user = await getUserByEmail(email);
 
     if (!user) {
       return NextResponse.json(
