@@ -29,12 +29,6 @@ export default function SignUpForm({ colors }: SignUpFormProps) {
       return;
     }
 
-    // Validate password length
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
-      return;
-    }
-
     setIsLoading(true);
 
     try {
