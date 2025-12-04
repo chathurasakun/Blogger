@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import TextField from "@/components/atoms/TextField";
 import TextArea from "@/components/atoms/TextArea";
 import PrimaryActionButton from "@/components/molecules/PrimaryActionButton";
+import { useCreatePost } from "@/hooks/useCreatePost";
 import type { ThemeColors } from "@/lib/themes";
 
 interface CreatePostFormProps {
@@ -15,49 +16,27 @@ interface CreatePostFormProps {
 
 export default function CreatePostForm({ colors, onSuccess, onCancel }: CreatePostFormProps) {
   const router = useRouter();
+  const { createPost, isLoading, error } = useCreatePost();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
-    setIsLoading(true);
 
-    try {
-      const response = await fetch("/api/posts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ title, content }),
-      });
+    const result = await createPost({ title, content });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Failed to create post");
-        setIsLoading(false);
-        return;
-      }
-
-      // Post created successfully
-      // Reset form
+    if (result?.ok) {
+      // Post created successfully - reset form
       setTitle("");
       setContent("");
-      setError(null);
-      
+
       // Refresh the page to show new post
       router.refresh();
-      
+
       // Call onSuccess callback if provided (to close modal)
       if (onSuccess) {
         onSuccess();
       }
-    } catch (err) {
-      setError("An error occurred. Please try again.");
-      setIsLoading(false);
     }
   };
 

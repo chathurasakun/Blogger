@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import TextField from "@/components/atoms/TextField";
 import PrimaryActionButton from "@/components/molecules/PrimaryActionButton";
 import SecondaryActionButton from "@/components/molecules/SecondaryActionButton";
+import { useSignUp } from "@/hooks/useSignUp";
 import type { ThemeColors } from "@/lib/themes";
 
 interface SignUpFormProps {
@@ -13,11 +14,11 @@ interface SignUpFormProps {
 
 export default function SignUpForm({ colors }: SignUpFormProps) {
   const router = useRouter();
+  const { signUp, isLoading, error: signUpError } = useSignUp();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -29,33 +30,17 @@ export default function SignUpForm({ colors }: SignUpFormProps) {
       return;
     }
 
-    setIsLoading(true);
+    const result = await signUp({ email, password });
 
-    try {
-      const response = await fetch("/api/signup", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Sign up failed");
-        setIsLoading(false);
-        return;
-      }
-
+    if (result?.ok) {
       // Sign up successful - redirect to dashboard
       router.push("/dashboard");
       router.refresh();
-    } catch (err) {
-      setError("An error occurred. Please try again.");
-      setIsLoading(false);
     }
   };
+
+  // Use hook error if available, otherwise use local validation error
+  const displayError = signUpError || error;
 
   return (
     <div className="relative rounded-3xl border border-white/10 bg-slate-900/80 p-6 sm:p-8 shadow-[0_18px_60px_rgba(15,23,42,0.9)] backdrop-blur-xl">
@@ -114,9 +99,9 @@ export default function SignUpForm({ colors }: SignUpFormProps) {
         />
 
         {/* Error message */}
-        {error && (
+        {displayError && (
           <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300">
-            {error}
+            {displayError}
           </div>
         )}
 
