@@ -9,9 +9,10 @@ interface PostsListProps {
   currentUserId: string;
   isSearching?: boolean;
   onEditPost?: (post: Post) => void;
+  onDeletePost?: (postId: string) => void;
 }
 
-export default function PostsList({ colors, posts, currentUserId, isSearching = false, onEditPost }: PostsListProps) {
+export default function PostsList({ colors, posts, currentUserId, isSearching = false, onEditPost, onDeletePost }: PostsListProps) {
   if (posts.length === 0) {
     return (
       <div className="rounded-xl border border-white/10 bg-slate-900/80 p-6">
@@ -36,6 +37,7 @@ export default function PostsList({ colors, posts, currentUserId, isSearching = 
           colors={colors} 
           currentUserId={currentUserId}
           onEdit={onEditPost}
+          onDelete={onDeletePost}
         />
       ))}
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { ThemeColors } from "@/lib/themes";
 import type { Post } from "@/components/molecules/PostCard";
 import CreatePostContainer from "@/components/organisms/CreatePostContainer";
@@ -14,6 +15,7 @@ interface PostsContainerProps {
 
 export default function PostsContainer({ colors, posts, currentUserId }: PostsContainerProps) {
   const [postToEdit, setPostToEdit] = useState<Post | null>(null);
+  const router = useRouter();
 
   const handleEditPost = (post: Post) => {
     setPostToEdit(post);
@@ -21,6 +23,11 @@ export default function PostsContainer({ colors, posts, currentUserId }: PostsCo
 
   const handleEditComplete = () => {
     setPostToEdit(null);
+  };
+
+  const handleDeletePost = (postId: string) => {
+    // Refresh the page to show updated posts list
+    router.refresh();
   };
 
   return (
@@ -37,6 +44,7 @@ export default function PostsContainer({ colors, posts, currentUserId }: PostsCo
         posts={posts} 
         currentUserId={currentUserId}
         onEditPost={handleEditPost}
+        onDeletePost={handleDeletePost}
       />
     </>
   );
