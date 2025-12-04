@@ -4,13 +4,14 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:health": "npx tsx prisma/test-db-connection.ts",
-    "db:query": "npx tsx prisma/scripts/run-query.ts prisma/query_scripts/query-users.sql"
+    "db:query": "npx tsx prisma/scripts/run-query.ts prisma/query_scripts/query-users.sql",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "@prisma/client": "^6.19.0",
