@@ -1,8 +1,6 @@
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 
 export function useSignOut() {
-  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,13 +17,14 @@ export function useSignOut() {
         throw new Error("Failed to sign out");
       }
 
-      // Redirect to login page
-      router.push("/tenant/login");
-      router.refresh();
+      setIsLoading(false);
+      return { ok: true };
     } catch (err) {
-      setError("Failed to sign out. Please try again.");
+      const errorMessage = "Failed to sign out. Please try again.";
+      setError(errorMessage);
       console.error("Sign out error:", err);
       setIsLoading(false);
+      return { ok: false, error: errorMessage };
     }
   };
 

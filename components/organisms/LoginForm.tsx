@@ -6,6 +6,7 @@ import TextField from "@/components/atoms/TextField";
 import Button from "@/components/atoms/Button";
 import PrimaryActionButton from "@/components/molecules/PrimaryActionButton";
 import SecondaryActionButton from "@/components/molecules/SecondaryActionButton";
+import { useLogin } from "@/hooks/useLogin";
 import type { ThemeColors } from "@/lib/themes";
 
 interface LoginFormProps {
@@ -14,40 +15,19 @@ interface LoginFormProps {
 
 export default function LoginForm({ colors }: LoginFormProps) {
   const router = useRouter();
+  const { login, isLoading, error } = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setError(null);
-    setIsLoading(true);
 
-    try {
-      const response = await fetch("/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+    const result = await login({ email, password });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "Login failed");
-        setIsLoading(false);
-        return;
-      }
-
+    if (result?.ok) {
       // Login successful - redirect to dashboard
       router.push("/dashboard");
-      // Optionally refresh to update session state
       router.refresh();
-    } catch (err) {
-      setError("An error occurred. Please try again.");
-      setIsLoading(false);
     }
   };
 
