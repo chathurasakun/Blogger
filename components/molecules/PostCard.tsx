@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { ThemeColors } from "@/lib/themes";
 import Popover from "@/components/molecules/Popover";
+import { useDeletePost } from "@/hooks/useDeletePost";
 
 export interface Post {
   id: string;
@@ -23,10 +24,14 @@ interface PostCardProps {
   colors: ThemeColors;
   currentUserId: string;
   onEdit?: (post: Post) => void;
+  onDelete?: (postId: string) => void;
 }
 
-export default function PostCard({ post, colors, currentUserId, onEdit }: PostCardProps) {
+export default function PostCard({ post, colors, currentUserId, onEdit, onDelete }: PostCardProps) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const { deletePost, isLoading } = useDeletePost();
+  
   const createdAt = typeof post.createdAt === "string" 
     ? new Date(post.createdAt) 
     : post.createdAt;
@@ -46,6 +51,25 @@ export default function PostCard({ post, colors, currentUserId, onEdit }: PostCa
     if (onEdit) {
       onEdit(post);
     }
+  };
+
+  const handleDeleteClick = () => {
+    setIsPopoverOpen(false);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    const result = await deletePost(post.id);
+    if (result.ok) {
+      setShowDeleteConfirm(false);
+      if (onDelete) {
+        onDelete(post.id);
+      }
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false);
   };
 
   return (
@@ -104,11 +128,11 @@ export default function PostCard({ post, colors, currentUserId, onEdit }: PostCa
                   Edit
                 </button>
                 <button
-                  onClick={() => setIsPopoverOpen(false)}
-                  className="w-full px-4 py-2 text-left text-sm text-slate-200 transition hover:bg-slate-700/50"
-                  disabled
+                  onClick={handleDeleteClick}
+                  className="w-full px-4 py-2 text-left text-sm text-red-400 transition hover:bg-slate-700/50"
+                  disabled={isLoading}
                 >
-                  Delete
+                  {isLoading ? "Deleting..." : "Delete"}
                 </button>
               </div>
             </Popover>
@@ -119,6 +143,33 @@ export default function PostCard({ post, colors, currentUserId, onEdit }: PostCa
       <div className="flex justify-end">
         <p className="text-xs text-slate-500">{formattedDate}</p>
       </div>
+      
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="mx-4 w-full max-w-md rounded-xl border border-white/10 bg-slate-800 p-6 shadow-xl">
+            <h3 className="mb-2 text-lg font-semibold text-slate-100">Delete Post</h3>
+            <p className="mb-6 text-slate-300">
+              Are you sure you want to delete this post? This action cannot be undone.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={handleDeleteCancel}
+                disabled={isLoading}
+                className="rounded-lg px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-700/50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={isLoading}
+                className="rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-700 disabled:opacity-50"
+              >
+                {isLoading ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

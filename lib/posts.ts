@@ -49,6 +49,25 @@ export async function updatePost({ id, title, content, userId }: UpdatePostParam
   });
 }
 
+export async function deletePost(id: string, userId: string) {
+  // First verify the post exists and belongs to the user
+  const post = await prisma.post.findUnique({
+    where: { id },
+  });
+
+  if (!post) {
+    throw new Error("Post not found");
+  }
+
+  if (post.userId !== userId) {
+    throw new Error("Unauthorized");
+  }
+
+  return prisma.post.delete({
+    where: { id },
+  });
+}
+
 export async function getPostsByTenant(tenantId: string) {
   return prisma.post.findMany({
     where: {
