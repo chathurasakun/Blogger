@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { headers } from "next/headers";
-import { getTenantByDomain } from "@/lib/tenants";
+import { getTenantByDomain, getAllTenants } from "@/lib/tenants";
 import { getThemeColors } from "@/lib/themes";
-import LoginForm from "@/components/organisms/LoginForm";
+import SignUpForm from "@/components/organisms/SignUpForm";
+import DomainSelector from "@/components/molecules/DomainSelector";
 
-export default async function LoginPage() {
+export default async function SignUpPage() {
   const host = headers().get("host") ?? "";
   const tenant = host ? await getTenantByDomain(host) : null;
+  const allTenants = await getAllTenants();
   
   // Get theme from database, fallback to "emerald" if not set
   const themeId = tenant?.theme || null;
@@ -26,7 +28,7 @@ export default async function LoginPage() {
           <p className="mb-6 text-sm text-slate-300/80">
             We couldn&apos;t find a Blogger workspace for{" "}
             <span className="font-semibold text-emerald-300">{host}</span>.
-            Double-check the URL or create a new account.
+            Double-check the URL or contact support.
           </p>
           <div className="flex flex-col gap-2 sm:flex-row">
             <Link
@@ -34,12 +36,6 @@ export default async function LoginPage() {
               className="inline-flex w-full items-center justify-center rounded-xl border border-white/15 bg-slate-900/60 px-4 py-2.5 text-sm font-medium text-slate-100 transition hover:border-slate-300/40 hover:bg-slate-800/80"
             >
               Go to homepage
-            </Link>
-            <Link
-              href="/signup"
-              className="inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-emerald-400 via-cyan-400 to-sky-500 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:shadow-emerald-400/40 hover:brightness-110"
-            >
-              Create a workspace
             </Link>
           </div>
         </div>
@@ -49,23 +45,31 @@ export default async function LoginPage() {
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 text-slate-100 flex items-center justify-center px-4 py-10">
+      {/* Domain Selector - Top Right */}
+      <div className="fixed top-4 right-4 z-30">
+        <DomainSelector
+          tenants={allTenants}
+          currentDomain={host}
+          currentPath="/tenant/signup"
+        />
+      </div>
+
       <div className="w-full max-w-5xl grid gap-10 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)] items-center">
         {/* Left: Marketing / Intro */}
         <section className="space-y-6">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-medium text-slate-200 backdrop-blur">
             <span className={`h-1.5 w-1.5 rounded-full ${colors.badgeBg}`} />
-            Welcome back to {tenant.name}
+            Join {tenant.name}
           </div>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
-            Sign in to{" "}
+            Create your{" "}
             <span className={`bg-gradient-to-r ${colors.gradientTextFrom} ${colors.gradientTextVia} ${colors.gradientTextTo} bg-clip-text text-transparent`}>
-              manage your posts
+              Blogger account
             </span>
           </h1>
           <p className="text-sm sm:text-base text-slate-300/80 leading-relaxed max-w-xl">
-            Draft, edit, and publish your blog posts with a delightful writing
-            experience. Continue where you left off and keep your audience
-            engaged.
+            Start writing and publishing your blog posts with a delightful writing
+            experience. Join thousands of creators who trust Blogger.
           </p>
 
           <div className="flex flex-wrap gap-4 text-xs sm:text-sm text-slate-300/80">
@@ -93,9 +97,10 @@ export default async function LoginPage() {
         {/* Right: Auth Card */}
         <section className="relative">
           <div className={`pointer-events-none absolute -inset-px rounded-3xl bg-gradient-to-br ${colors.gradientFrom}/40 ${colors.gradientVia}/20 ${colors.gradientTo}/40 opacity-60 blur-2xl`} />
-          <LoginForm colors={colors} />
+          <SignUpForm colors={colors} />
         </section>
       </div>
     </main>
   );
 }
+

@@ -14,3 +14,17 @@ export async function getTenantByDomain(domain: string) {
     where: { domain },
   });
 }
+
+export async function getAllTenants() {
+  return prisma.tenant.findMany({
+    select: {
+      id: true,
+      name: true,
+      domain: true,
+      theme: true,
+    },
+    orderBy: {
+      name: "asc",
+    },
+  });
+}

@@ -141,7 +141,7 @@ export default function SignUpForm({ colors }: SignUpFormProps) {
         <div className="space-y-2 text-center text-xs text-slate-300/90">
           <p>Already have an account?</p>
           <div className="flex flex-col sm:flex-row gap-2">
-            <SecondaryActionButton href="/login" colors={colors}>
+            <SecondaryActionButton href="/tenant/login" colors={colors}>
               Sign in
             </SecondaryActionButton>
           </div>

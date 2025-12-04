@@ -20,7 +20,7 @@ export function useSignOut() {
       }
 
       // Redirect to login page
-      router.push("/login");
+      router.push("/tenant/login");
       router.refresh();
     } catch (err) {
       setError("Failed to sign out. Please try again.");
