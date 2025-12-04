@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/auth";
 import { getTenantByDomain } from "@/lib/tenants";
 import { hashPassword, validatePassword } from "@/lib/password";
 import { checkRateLimit, getClientIdentifier } from "@/lib/rate-limit";
+import { userExistsByEmail, createUser } from "@/lib/users";
 
 export async function POST(request: NextRequest) {
   try {
@@ -69,11 +69,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
+    const userExists = await userExistsByEmail(email);
 
-    if (existingUser) {
+    if (userExists) {
       return NextResponse.json(
         { error: "User with this email already exists" },
         { status: 409 }
@@ -84,12 +82,10 @@ export async function POST(request: NextRequest) {
     const hashedPassword = await hashPassword(password);
 
     // Create new user
-    const user = await prisma.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        tenantId: tenant.id,
-      },
+    const user = await createUser({
+      email,
+      password: hashedPassword,
+      tenantId: tenant.id,
     });
 
     // Create tenant-scoped session

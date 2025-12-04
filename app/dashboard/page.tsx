@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { getTenantByDomain } from "@/lib/tenants";
 import { getThemeColors } from "@/lib/themes";
+import { getUserById } from "@/lib/users";
 import Header from "@/components/organisms/Header";
 
 export default async function DashboardPage() {
@@ -27,10 +27,7 @@ export default async function DashboardPage() {
     redirect("/tenant/login");
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.userId },
-    include: { tenant: true },
-  });
+  const user = await getUserById(session.userId);
 
   if (!user) {
     redirect("/tenant/login");
