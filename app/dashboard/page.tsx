@@ -4,8 +4,10 @@ import { getSession } from "@/lib/auth";
 import { getTenantByDomain } from "@/lib/tenants";
 import { getThemeColors } from "@/lib/themes";
 import { getUserById } from "@/lib/users";
+import { getPostsByTenant } from "@/lib/posts";
 import Header from "@/components/organisms/Header";
 import CreatePostContainer from "@/components/organisms/CreatePostContainer";
+import PostsSection from "@/components/organisms/PostsSection";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -28,7 +30,11 @@ export default async function DashboardPage() {
     redirect("/tenant/login");
   }
 
-  const user = await getUserById(session.userId);
+  // Fetch user and posts in parallel (they don't depend on each other)
+  const [user, posts] = await Promise.all([
+    getUserById(session.userId),
+    getPostsByTenant(currentTenant.id),
+  ]);
 
   if (!user) {
     redirect("/tenant/login");
@@ -53,12 +59,7 @@ export default async function DashboardPage() {
           <CreatePostContainer colors={colors} />
         </div>
 
-        <div className="rounded-xl border border-white/10 bg-slate-900/80 p-6">
-          <h3 className="mb-2 text-lg font-semibold">Your Posts</h3>
-          <p className="text-slate-400">
-            No posts yet. Create your first post to get started!
-          </p>
-        </div>
+        <PostsSection colors={colors} posts={posts} currentUserId={user.id} />
       </main>
     </div>
   );

@@ -18,3 +18,22 @@ export async function createPost({ title, content, tenantId, userId }: CreatePos
     },
   });
 }
+
+export async function getPostsByTenant(tenantId: string) {
+  return prisma.post.findMany({
+    where: {
+      tenantId,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          email: true,
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+}

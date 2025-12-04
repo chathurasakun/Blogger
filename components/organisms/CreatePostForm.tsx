@@ -30,7 +30,7 @@ export default function CreatePostForm({ colors, onSuccess, onCancel }: CreatePo
       setTitle("");
       setContent("");
 
-      // Refresh the page to show new post
+      // Refresh the server component to fetch new posts
       router.refresh();
 
       // Call onSuccess callback if provided (to close modal)
