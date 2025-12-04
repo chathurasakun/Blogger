@@ -6,12 +6,14 @@ interface PrimaryActionButtonProps extends ButtonHTMLAttributes<HTMLButtonElemen
   colors: ThemeColors;
   isLoading?: boolean;
   loadingText?: string;
+  size?: "sm" | "md" | "lg" | "full";
 }
 
 export default function PrimaryActionButton({
   colors,
   isLoading = false,
   loadingText,
+  size = "full",
   children,
   ...buttonProps
 }: PrimaryActionButtonProps) {
@@ -21,6 +23,7 @@ export default function PrimaryActionButton({
       variant="primary"
       isLoading={isLoading}
       loadingText={loadingText}
+      size={size}
       {...buttonProps}
     >
       {children}
