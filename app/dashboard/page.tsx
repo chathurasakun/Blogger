@@ -1,10 +1,13 @@
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 import { getTenantByDomain } from "@/lib/tenants";
 import { getThemeColors } from "@/lib/themes";
-import SignOutButton from "@/components/molecules/SignOutButton";
+import { getUserById } from "@/lib/users";
+import { getPostsByTenant } from "@/lib/posts";
+import Header from "@/components/organisms/Header";
+import CreatePostContainer from "@/components/organisms/CreatePostContainer";
+import PostsSection from "@/components/organisms/PostsSection";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -27,10 +30,11 @@ export default async function DashboardPage() {
     redirect("/tenant/login");
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.userId },
-    include: { tenant: true },
-  });
+  // Fetch user and posts in parallel (they don't depend on each other)
+  const [user, posts] = await Promise.all([
+    getUserById(session.userId),
+    getPostsByTenant(currentTenant.id),
+  ]);
 
   if (!user) {
     redirect("/tenant/login");
@@ -42,26 +46,20 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      {/* Header */}
-      <header className="border-b border-white/10 bg-slate-900/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-          <h1 className="text-xl font-semibold">Dashboard</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-300">{user.email}</span>
-            <SignOutButton colors={colors} />
-          </div>
-        </div>
-      </header>
-
-      {/* Main content */}
+      <Header title="Dashboard" userEmail={user.email} colors={colors} />
       <main className="mx-auto max-w-7xl px-4 py-8">
-        <div className="rounded-xl border border-white/10 bg-slate-900/80 p-6">
-          <h2 className="mb-4 text-2xl font-semibold">Welcome back!</h2>
-          <p className="text-slate-300">
-            You are logged in as <strong>{user.email}</strong> from{" "}
-            <strong>{user.tenant.name}</strong>.
-          </p>
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold">Welcome back!</h2>
+            <p className="mt-1 text-slate-300">
+              You are logged in as <strong>{user.email}</strong> from{" "}
+              <strong>{user.tenant.name}</strong>.
+            </p>
+          </div>
+          <CreatePostContainer colors={colors} />
         </div>
+
+        <PostsSection colors={colors} posts={posts} currentUserId={user.id} />
       </main>
     </div>
   );
