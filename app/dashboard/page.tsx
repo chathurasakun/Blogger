@@ -4,7 +4,7 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getTenantByDomain } from "@/lib/tenants";
 import { getThemeColors } from "@/lib/themes";
-import SignOutButton from "@/components/molecules/SignOutButton";
+import Header from "@/components/organisms/Header";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -42,16 +42,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      {/* Header */}
-      <header className="border-b border-white/10 bg-slate-900/80 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-          <h1 className="text-xl font-semibold">Dashboard</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-slate-300">{user.email}</span>
-            <SignOutButton colors={colors} />
-          </div>
-        </div>
-      </header>
+      <Header title="Dashboard" userEmail={user.email} colors={colors} />
 
       {/* Main content */}
       <main className="mx-auto max-w-7xl px-4 py-8">
