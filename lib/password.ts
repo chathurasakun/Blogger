@@ -1,19 +1,7 @@
 import bcrypt from "bcryptjs";
 
 // Production: Use 12-14 rounds. 10 is minimum, higher = more secure but slower
-// Can be overridden via BCRYPT_ROUNDS environment variable
 const DEFAULT_SALT_ROUNDS = 12;
-const getSaltRounds = (): number => {
-  const envRounds = process.env.BCRYPT_ROUNDS;
-  if (envRounds) {
-    const rounds = parseInt(envRounds, 10);
-    // Validate: between 10-15 (15+ can be too slow)
-    if (rounds >= 10 && rounds <= 15) {
-      return rounds;
-    }
-  }
-  return DEFAULT_SALT_ROUNDS;
-};
 
 /**
  * Hash a plain text password using bcrypt
@@ -22,8 +10,7 @@ const getSaltRounds = (): number => {
  * @returns Hashed password
  */
 export async function hashPassword(password: string): Promise<string> {
-  const saltRounds = getSaltRounds();
-  return bcrypt.hash(password, saltRounds);
+  return bcrypt.hash(password, DEFAULT_SALT_ROUNDS);
 }
 
 /**
