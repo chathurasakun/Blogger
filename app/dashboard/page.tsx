@@ -5,7 +5,7 @@ import { getTenantByDomain } from "@/lib/tenants";
 import { getThemeColors } from "@/lib/themes";
 import { getUserById } from "@/lib/users";
 import Header from "@/components/organisms/Header";
-import DashboardContent from "@/components/organisms/DashboardContent";
+import CreatePostContainer from "@/components/organisms/CreatePostContainer";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -41,11 +41,25 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
       <Header title="Dashboard" userEmail={user.email} colors={colors} />
-      <DashboardContent
-        userEmail={user.email}
-        tenantName={user.tenant.name}
-        colors={colors}
-      />
+      <main className="mx-auto max-w-7xl px-4 py-8">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold">Welcome back!</h2>
+            <p className="mt-1 text-slate-300">
+              You are logged in as <strong>{user.email}</strong> from{" "}
+              <strong>{user.tenant.name}</strong>.
+            </p>
+          </div>
+          <CreatePostContainer colors={colors} />
+        </div>
+
+        <div className="rounded-xl border border-white/10 bg-slate-900/80 p-6">
+          <h3 className="mb-2 text-lg font-semibold">Your Posts</h3>
+          <p className="text-slate-400">
+            No posts yet. Create your first post to get started!
+          </p>
+        </div>
+      </main>
     </div>
   );
 }
