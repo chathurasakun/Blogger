@@ -14,7 +14,7 @@ export interface Post {
     domain: string;
     theme: string;
   };
-  user?: {
+  user: {
     id: string;
     email: string;
   };
@@ -101,41 +101,61 @@ export async function deletePost(id: string, userId: string) {
   });
 }
 
-export async function getPostsByTenant(tenantId: string, currentUserId?: string) {
+export async function getPostsByTenant(tenantId: string, currentUserId?: string): Promise<(Post & { isLiked: boolean })[]> {
+  const includeConfig: any = {
+    user: {
+      select: {
+        id: true,
+        email: true,
+      },
+    },
+  };
+
+  if (currentUserId) {
+    includeConfig.likes = {
+      where: {
+        userId: currentUserId,
+      },
+      select: {
+        id: true,
+      },
+    };
+  }
+
   const posts = await prisma.post.findMany({
     where: {
       tenantId,
     },
-    include: {
-      user: {
-        select: {
-          id: true,
-          email: true,
-        },
-      },
-      likes: currentUserId
-        ? {
-            where: {
-              userId: currentUserId,
-            },
-            select: {
-              id: true,
-            },
-          }
-        : false,
-    },
+    include: includeConfig,
     orderBy: {
       createdAt: "desc",
     },
   });
 
   // Map posts to include isLiked flag
-  return posts.map((post: Post) => {
-    const { likes, ...rest } = post;
+  return posts.map((post: any) => {
+    const { likes, user, ...rest } = post;
+    const isLiked = currentUserId ? (Array.isArray(likes) && likes.length > 0) : false;
+    
+    // Ensure user is always present (it's always included in the query)
+    if (!user) {
+      throw new Error("User data is missing from post");
+    }
+    
+    // Explicitly construct the return object to ensure proper typing
     return {
-      ...rest,
-      isLiked: currentUserId ? (likes && Array.isArray(likes) ? likes.length > 0 : false) : false,
-    };
+      id: rest.id,
+      title: rest.title,
+      content: rest.content,
+      createdAt: rest.createdAt,
+      tenantId: rest.tenantId,
+      userId: rest.userId,
+      likeCount: rest.likeCount,
+      user: { id: user.id, email: user.email }, // Explicitly construct user object
+      isLiked,
+      ...(rest.tenant && { tenant: rest.tenant }),
+      ...(rest.comments && { comments: rest.comments }),
+    } as Post & { isLiked: boolean };
   });
 }
 
