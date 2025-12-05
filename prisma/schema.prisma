@@ -26,6 +26,7 @@ model User {
   sessions Session[]
   posts    Post[]
   comments Comment[]
+  likes    Like[]
 }
 
 model Session {
@@ -48,6 +49,7 @@ model Post {
   tenant    Tenant    @relation(fields: [tenantId], references: [id])
   user      User      @relation(fields: [userId], references: [id])
   comments  Comment[]
+  likes     Like[]
 }
 
 model Comment {
@@ -58,4 +60,15 @@ model Comment {
   userId    String
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id])
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
 }

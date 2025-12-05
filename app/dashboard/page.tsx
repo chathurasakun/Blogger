@@ -32,7 +32,7 @@ export default async function DashboardPage() {
   // Fetch user and posts in parallel (they don't depend on each other)
   const [user, posts] = await Promise.all([
     getUserById(session.userId),
-    getPostsByTenant(currentTenant.id),
+    getPostsByTenant(currentTenant.id, session.userId),
   ]);
 
   if (!user) {
