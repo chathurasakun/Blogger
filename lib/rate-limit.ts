@@ -4,6 +4,7 @@
  */
 
 import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 interface RateLimitEntry {
   count: number;
@@ -80,5 +81,36 @@ export function getClientIdentifier(request: NextRequest): string {
   const realIp = request.headers.get("x-real-ip");
   const ip = forwarded?.split(",")[0] || realIp || request.ip || "unknown";
   return ip;
+}
+
+/**
+ * Creates a rate limit error response
+ * @param rateLimit - Rate limit result from checkRateLimit
+ * @param maxAttempts - Maximum attempts allowed
+ * @param errorMessage - Error message to display
+ * @returns NextResponse with 429 status and rate limit headers
+ */
+export function createRateLimitResponse(
+  rateLimit: { resetTime: number },
+  maxAttempts: number,
+  errorMessage: string
+): NextResponse {
+  const retryAfter = Math.ceil((rateLimit.resetTime - Date.now()) / 1000);
+  
+  return NextResponse.json(
+    {
+      error: errorMessage,
+      retryAfter,
+    },
+    {
+      status: 429,
+      headers: {
+        "Retry-After": retryAfter.toString(),
+        "X-RateLimit-Limit": maxAttempts.toString(),
+        "X-RateLimit-Remaining": "0",
+        "X-RateLimit-Reset": rateLimit.resetTime.toString(),
+      },
+    }
+  );
 }
 

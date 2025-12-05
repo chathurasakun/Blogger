@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSession } from "@/lib/auth";
 import { getTenantByDomain } from "@/lib/tenants";
 import { comparePassword } from "@/lib/password";
-import { checkRateLimit, getClientIdentifier } from "@/lib/rate-limit";
+import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/rate-limit";
 import { getUserByEmail } from "@/lib/users";
 
 export async function POST(request: NextRequest) {
@@ -22,20 +22,10 @@ export async function POST(request: NextRequest) {
     const rateLimit = checkRateLimit(clientId, 5, 5 * 60 * 1000);
     
     if (!rateLimit.allowed) {
-      return NextResponse.json(
-        { 
-          error: "Too many login attempts. Please try again in 5 mins.",
-          retryAfter: Math.ceil((rateLimit.resetTime - Date.now()) / 1000)
-        },
-        { 
-          status: 429,
-          headers: {
-            "Retry-After": Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),
-            "X-RateLimit-Limit": "5",
-            "X-RateLimit-Remaining": "0",
-            "X-RateLimit-Reset": rateLimit.resetTime.toString(),
-          }
-        }
+      return createRateLimitResponse(
+        rateLimit,
+        5,
+        "Too many login attempts. Please try again in 5 mins."
       );
     }
 
