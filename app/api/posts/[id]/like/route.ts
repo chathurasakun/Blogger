@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
-import { getTenantByDomain } from "@/lib/tenants";
+import { validateAuthAndTenant } from "@/lib/auth";
 import { toggleLikePost } from "@/lib/posts";
 
 export async function POST(
@@ -8,45 +7,13 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    // Check authentication
-    const session = await getSession();
-    if (!session) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+    // Validate authentication and tenant
+    const authResult = await validateAuthAndTenant(request);
+    if (authResult.error) {
+      return authResult.error;
     }
 
-    // Extract userId and tenantId with proper type handling
-    const userId = session.userId;
-    const tenantId = session.tenantId;
-
-    // Ensure session has required fields
-    if (!userId || !tenantId) {
-      return NextResponse.json(
-        { error: "Invalid session" },
-        { status: 401 }
-      );
-    }
-
-    // Get the current tenant from the domain
-    const host = request.headers.get("host") ?? "";
-    const tenant = host ? await getTenantByDomain(host) : null;
-
-    if (!tenant) {
-      return NextResponse.json(
-        { error: "Invalid tenant domain" },
-        { status: 400 }
-      );
-    }
-
-    // Verify session belongs to current tenant
-    if (tenantId !== tenant.id) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
+    const { userId, tenant } = authResult;
 
     // Get post ID from params
     const postId = params.id;

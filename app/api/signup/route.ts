@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSession } from "@/lib/auth";
 import { getTenantByDomain } from "@/lib/tenants";
 import { hashPassword, validatePassword } from "@/lib/password";
-import { checkRateLimit, getClientIdentifier } from "@/lib/rate-limit";
+import { checkRateLimit, getClientIdentifier, createRateLimitResponse } from "@/lib/rate-limit";
 import { userExistsByEmail, createUser } from "@/lib/users";
 
 export async function POST(request: NextRequest) {
@@ -40,20 +40,10 @@ export async function POST(request: NextRequest) {
     const rateLimit = checkRateLimit(clientId, 3, 15 * 60 * 1000);
     
     if (!rateLimit.allowed) {
-      return NextResponse.json(
-        { 
-          error: "Too many signup attempts. Please try again in 15 mins.",
-          retryAfter: Math.ceil((rateLimit.resetTime - Date.now()) / 1000)
-        },
-        { 
-          status: 429,
-          headers: {
-            "Retry-After": Math.ceil((rateLimit.resetTime - Date.now()) / 1000).toString(),
-            "X-RateLimit-Limit": "3",
-            "X-RateLimit-Remaining": "0",
-            "X-RateLimit-Reset": rateLimit.resetTime.toString(),
-          }
-        }
+      return createRateLimitResponse(
+        rateLimit,
+        3,
+        "Too many signup attempts. Please try again in 15 mins."
       );
     }
 
