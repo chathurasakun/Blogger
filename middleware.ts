@@ -4,7 +4,7 @@ import { NextResponse, type NextRequest } from "next/server";
 const publicRoutes = ["/tenant/login", "/tenant/signup"];
 
 // Routes that require authentication
-const protectedRoutes = ["/dashboard", "/posts", "/settings"];
+const protectedRoutes = ["/dashboard"];
 
 export function middleware(req: NextRequest) {
   const url = req.nextUrl;

@@ -1,7 +1,7 @@
 import { prisma } from "./prisma";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { getTenantByDomain, Tenant } from "./tenants";
+import { getTenantByDomain, Tenant, isUserAdmin } from "./tenants";
 
 export interface Session {
     id: string;
@@ -96,4 +96,36 @@ export async function validateAuthAndTenant(
   }
 
   return { userId, tenantId, tenant };
+}
+
+/**
+ * Validates authentication, tenant, and admin role for API routes.
+ * Returns either an error response or validated session data with admin confirmation.
+ */
+export async function validateAuthAndAdmin(
+  request: NextRequest
+): Promise<
+  | { error: NextResponse; userId?: never; tenantId?: never; tenant?: never }
+  | { error?: never; userId: string; tenantId: string; tenant: Tenant }
+> {
+  // First validate basic auth and tenant
+  const authResult = await validateAuthAndTenant(request);
+  if (authResult.error) {
+    return authResult;
+  }
+
+  const { userId, tenantId } = authResult;
+
+  // Check if user is admin
+  const isAdmin = await isUserAdmin(userId, tenantId);
+  if (!isAdmin) {
+    return {
+      error: NextResponse.json(
+        { error: "Forbidden: Admin access required" },
+        { status: 403 }
+      ),
+    };
+  }
+
+  return { userId, tenantId, tenant: authResult.tenant };
 }
