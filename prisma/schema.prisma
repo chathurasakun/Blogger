@@ -7,9 +7,16 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum UserRole {
+  admin
+  member
+}
+
 model Tenant {
   id       String   @id @default(uuid())
   name     String
+  blogName String?  // Display name for the blog
+  logo     String?  // URL or path to logo image
   domain   String   @unique
   theme    String   @default("emerald") // Theme identifier: "emerald", "violet", etc.
   users    User[]
@@ -21,6 +28,7 @@ model User {
   id       String    @id @default(uuid())
   email    String    @unique
   password String
+  role     UserRole  @default(member)
   tenantId String
   tenant   Tenant    @relation(fields: [tenantId], references: [id])
   sessions Session[]
