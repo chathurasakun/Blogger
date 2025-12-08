@@ -8,6 +8,7 @@ import { getPostsByTenant } from "@/lib/posts";
 import Header from "@/components/organisms/Header";
 import PostsContainer from "@/components/organisms/PostsContainer";
 import BlogLogo from "@/components/molecules/BlogLogo";
+import AdminBadge from "@/components/molecules/AdminBadge";
 
 export default async function DashboardPage() {
   const session = await getSession();
@@ -49,21 +50,24 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      <Header title="Dashboard" colors={colors} showSettingsLink={userIsAdmin} tenant={currentTenant} />
+      <Header title="Dashboard" colors={colors} showSettingsLink={userIsAdmin} tenant={currentTenant} userIsAdmin={userIsAdmin} />
       <main className="mx-auto max-w-7xl px-4 py-8">
         <div className="mb-6">
-          <div className="mb-4 flex items-center gap-4">
+          <div className={`mb-4 flex items-center gap-4 p-4 rounded-lg ${userIsAdmin ? 'bg-gradient-to-r from-amber-500/5 via-yellow-500/5 to-amber-500/5 border border-amber-500/20' : ''}`}>
             <BlogLogo
               logo={currentTenant.logo}
               alt={currentTenant.blogName || currentTenant.name || "Blog"}
             />
-            <div>
+            <div className="flex-1">
               <h2 className="text-2xl font-semibold">
                 {currentTenant.blogName || currentTenant.name}
               </h2>
-              <p className="mt-1 text-slate-300">
-                You are logged in as <strong>{user.email}</strong>
-              </p>
+              <div className="mt-1 flex items-center gap-3 flex-wrap">
+                <p className="text-slate-300">
+                  You are logged in as <strong className={`${userIsAdmin ? 'text-amber-200' : 'text-slate-100'}`}>{user.email}</strong>
+                </p>
+                {userIsAdmin && <AdminBadge variant="default" />}
+              </div>
             </div>
           </div>
         </div>
