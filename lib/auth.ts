@@ -8,7 +8,7 @@ export interface Session {
     id: string;
     userId: string;
     tenantId: string;
-    expiresAt: string;
+    expiresAt: Date;
 }
 
 export async function getSession() {
