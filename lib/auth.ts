@@ -1,7 +1,8 @@
 import { prisma } from "./prisma";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { getTenantByDomain, Tenant, isUserAdmin } from "./tenants";
+import { getUserById, UserWithTenant } from "./users";
 
 export interface Session {
     id: string;
@@ -128,4 +129,54 @@ export async function validateAuthAndAdmin(
   }
 
   return { userId, tenantId, tenant: authResult.tenant };
+}
+
+/**
+ * Validates all requirements for dashboard access.
+ * Returns either a redirect path if validation fails, or validated data for rendering.
+ */
+export async function validateDashboardAccess(): Promise<
+  | { redirect: string }
+  | {
+      session: Session;
+      tenant: Tenant;
+      user: UserWithTenant;
+      userIsAdmin: boolean;
+    }
+> {
+  const FALLBACK_PATH = "/tenant/login";
+
+  // Check session exists
+  const session = await getSession();
+  if (!session) {
+    return { redirect: FALLBACK_PATH };
+  }
+
+  // Get current tenant from domain
+  const host = headers().get("host") ?? "";
+  const currentTenant = host ? await getTenantByDomain(host) : null;
+  if (!currentTenant) {
+    return { redirect: FALLBACK_PATH };
+  }
+
+  // Verify session belongs to current tenant
+  if (session.tenantId !== currentTenant.id) {
+    return { redirect: FALLBACK_PATH };
+  }
+
+  // Fetch user
+  const user = await getUserById(session.userId);
+  if (!user) {
+    return { redirect: FALLBACK_PATH };
+  }
+
+  // Check if user is admin
+  const userIsAdmin = await isUserAdmin(session.userId, currentTenant.id);
+
+  return {
+    session,
+    tenant: currentTenant,
+    user,
+    userIsAdmin,
+  };
 }
