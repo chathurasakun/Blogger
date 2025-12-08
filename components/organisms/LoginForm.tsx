@@ -6,6 +6,7 @@ import TextField from "@/components/atoms/TextField";
 import Button from "@/components/atoms/Button";
 import PrimaryActionButton from "@/components/molecules/PrimaryActionButton";
 import SecondaryActionButton from "@/components/molecules/SecondaryActionButton";
+import Modal from "@/components/molecules/Modal";
 import { useLogin } from "@/hooks/useLogin";
 import type { ThemeColors } from "@/lib/themes";
 
@@ -18,6 +19,7 @@ export default function LoginForm({ colors }: LoginFormProps) {
   const { login, isLoading, error } = useLogin();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -75,6 +77,7 @@ export default function LoginForm({ colors }: LoginFormProps) {
               type="button"
               colors={colors}
               variant="text"
+              onClick={() => setIsForgotPasswordOpen(true)}
             >
               Forgot password?
             </Button>
@@ -126,6 +129,32 @@ export default function LoginForm({ colors }: LoginFormProps) {
           </div>
         </div>
       </form>
+
+      {/* Forgot Password Coming Soon Modal */}
+      <Modal
+        isOpen={isForgotPasswordOpen}
+        onClose={() => setIsForgotPasswordOpen(false)}
+        title="Forgot Password"
+      >
+        <div className="space-y-4">
+          <div className="rounded-xl border border-blue-500/20 bg-blue-500/10 px-4 py-3 text-sm text-blue-300">
+            <p className="font-medium mb-2">Coming Soon</p>
+            <p className="text-slate-300/90">
+              The password reset feature will be available in the next iteration. 
+              Please contact your administrator if you need assistance with your account.
+            </p>
+          </div>
+          <div className="flex justify-end">
+            <SecondaryActionButton
+              onClick={() => setIsForgotPasswordOpen(false)}
+              colors={colors}
+              href={""}
+            >
+              Close
+            </SecondaryActionButton>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
