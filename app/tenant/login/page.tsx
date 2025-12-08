@@ -1,9 +1,9 @@
-import Link from "next/link";
 import { headers } from "next/headers";
 import { getTenantByDomain, getAllTenants } from "@/lib/tenants";
 import { getThemeColors } from "@/lib/themes";
 import LoginForm from "@/components/organisms/LoginForm";
 import DomainSelector from "@/components/molecules/DomainSelector";
+import TenantNotFound from "@/components/molecules/TenantNotFound";
 
 export default async function LoginPage() {
   const host = headers().get("host") ?? "";
@@ -16,37 +16,7 @@ export default async function LoginPage() {
 
   // If tenant is not found for this domain, show a friendly message instead of throwing.
   if (!tenant) {
-    return (
-      <main className="min-h-screen flex items-center justify-center bg-slate-950 px-4">
-        <div className="max-w-md rounded-2xl border border-white/10 bg-slate-900/80 px-6 py-8 text-center text-slate-100 shadow-[0_18px_60px_rgba(15,23,42,0.9)]">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-emerald-300/80">
-            Tenant not found
-          </p>
-          <h1 className="mb-3 text-2xl font-semibold">
-            This workspace doesn&apos;t exist
-          </h1>
-          <p className="mb-6 text-sm text-slate-300/80">
-            We couldn&apos;t find a Blogger workspace for{" "}
-            <span className="font-semibold text-emerald-300">{host}</span>.
-            Double-check the URL or create a new account.
-          </p>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Link
-              href="/"
-              className="inline-flex w-full items-center justify-center rounded-xl border border-white/15 bg-slate-900/60 px-4 py-2.5 text-sm font-medium text-slate-100 transition hover:border-slate-300/40 hover:bg-slate-800/80"
-            >
-              Go to homepage
-            </Link>
-            <Link
-              href="/tenant/signup"
-              className="inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-emerald-400 via-cyan-400 to-sky-500 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:shadow-emerald-400/40 hover:brightness-110"
-            >
-              Create a workspace
-            </Link>
-          </div>
-        </div>
-      </main>
-    );
+    return <TenantNotFound host={host} />;
   }
 
   return (
@@ -70,35 +40,14 @@ export default async function LoginPage() {
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight">
             Sign in to{" "}
             <span className={`bg-gradient-to-r ${colors.gradientTextFrom} ${colors.gradientTextVia} ${colors.gradientTextTo} bg-clip-text text-transparent`}>
-              manage your posts
+              manage your blog posts
             </span>
           </h1>
           <p className="text-sm sm:text-base text-slate-300/80 leading-relaxed max-w-xl">
-            Draft, edit, and publish your blog posts with a delightful writing
+            Create, edit, and publish your blog posts with a delightful writing
             experience. Continue where you left off and keep your audience
             engaged.
           </p>
-
-          <div className="flex flex-wrap gap-4 text-xs sm:text-sm text-slate-300/80">
-            <div className="flex items-center gap-2">
-              <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${colors.badgeBgLight} ${colors.badgeText}`}>
-                1
-              </span>
-              <span>Focus mode editor</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${colors.badgeBgLight} ${colors.badgeText}`}>
-                2
-              </span>
-              <span>Instant previews</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${colors.badgeBgLight} ${colors.badgeText}`}>
-                3
-              </span>
-              <span>Collaborative drafts</span>
-            </div>
-          </div>
         </section>
 
         {/* Right: Auth Card */}
