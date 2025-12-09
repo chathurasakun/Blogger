@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import OptimizedImage from "@/components/atoms/OptimizedImage";
 import TextField from "@/components/atoms/TextField";
 import PrimaryActionButton from "@/components/molecules/PrimaryActionButton";
 import { useUpdateTenantSettings } from "@/hooks/useUpdateTenantSettings";
@@ -185,13 +185,16 @@ export default function SettingsForm({ tenant, colors, onSuccess, onCancel }: Se
           {logoPreview ? (
             <div className="p-6 flex flex-col items-center gap-4">
               <div className="relative">
-                <Image
+                <OptimizedImage
                   src={logoPreview}
                   alt="Logo preview"
                   width={128}
                   height={128}
+                  sizes="128px"
                   className="h-32 w-32 rounded-full object-cover border-2 border-green-500"
                   unoptimized={logoPreview.startsWith("data:")}
+                  quality={logoPreview.startsWith("data:") ? undefined : 90} // Higher quality for actual logos, default for data URLs
+                  priority={!logoPreview.startsWith("data:")} // Priority for actual uploaded logos
                 />
                 <button
                   type="button"

@@ -1,4 +1,4 @@
-import Image from "next/image";
+import OptimizedImage from "@/components/atoms/OptimizedImage";
 
 interface BlogLogoProps {
   logo: string | null | undefined;
@@ -25,19 +25,21 @@ export default function BlogLogo({ logo, alt, size = 64 }: BlogLogoProps) {
     );
   }
 
-  // All logos are stored locally in /public/uploads/, so we use Next.js Image for optimization
+  // All logos are stored locally in /public/uploads/, so we use OptimizedImage for optimization
   return (
     <div
       className="rounded-full border-2 border-green-500 overflow-hidden relative"
       style={{ height: `${size}px`, width: `${size}px` }}
     >
-      <Image
+      <OptimizedImage
         src={logo}
         alt={alt}
         width={size}
         height={size}
+        sizes={`${size}px`}
         className="object-cover"
         priority // Load immediately since logo is above the fold
+        quality={90} // Higher quality for logos to maintain brand clarity
       />
     </div>
   );
