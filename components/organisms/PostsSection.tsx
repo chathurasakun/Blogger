@@ -9,9 +9,11 @@ interface PostsSectionProps {
   colors: ThemeColors;
   posts: Post[];
   currentUserId: string;
+  onEditPost?: (post: Post) => void;
+  onDeletePost?: (postId: string) => void;
 }
 
-export default function PostsSection({ colors, posts, currentUserId }: PostsSectionProps) {
+export default function PostsSection({ colors, posts, currentUserId, onEditPost, onDeletePost }: PostsSectionProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredPosts = useMemo(() => {
@@ -40,6 +42,8 @@ export default function PostsSection({ colors, posts, currentUserId }: PostsSect
         posts={filteredPosts}
         currentUserId={currentUserId}
         isSearching={!!searchQuery.trim()}
+        onEditPost={onEditPost}
+        onDeletePost={onDeletePost}
       />
     </div>
   );

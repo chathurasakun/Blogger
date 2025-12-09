@@ -3,6 +3,7 @@ import { prisma } from "./prisma";
 export interface UserWithTenant {
   id: string;
   email: string;
+  role: string;
   tenantId: string;
   tenant: {
     id: string;
@@ -49,9 +50,13 @@ export async function createUser(data: {
   email: string;
   password: string;
   tenantId: string;
+  role?: "admin" | "member";
 }) {
   return prisma.user.create({
-    data,
+    data: {
+      ...data,
+      role: data.role || "member",
+    },
   });
 }
 

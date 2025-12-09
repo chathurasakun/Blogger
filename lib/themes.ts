@@ -8,6 +8,7 @@ export type ThemeId = "emerald" | "violet" | "blue" | "orange" | "rose";
 export interface ThemeColors {
   // Primary colors
   primary: string;
+  primaryHover: string;
   secondary: string;
   accent: string;
   // Gradient classes
@@ -47,7 +48,8 @@ export interface ThemeColors {
  */
 export const themes: Record<ThemeId, ThemeColors> = {
   emerald: {
-    primary: "emerald",
+    primary: "bg-emerald-600",
+    primaryHover: "hover:bg-emerald-700",
     secondary: "cyan",
     accent: "sky",
     gradientFrom: "from-emerald-400",
@@ -75,7 +77,8 @@ export const themes: Record<ThemeId, ThemeColors> = {
     forgotPasswordHover: "hover:text-emerald-200",
   },
   violet: {
-    primary: "violet",
+    primary: "bg-violet-600",
+    primaryHover: "hover:bg-violet-700",
     secondary: "purple",
     accent: "fuchsia",
     gradientFrom: "from-violet-400",
@@ -103,7 +106,8 @@ export const themes: Record<ThemeId, ThemeColors> = {
     forgotPasswordHover: "hover:text-violet-200",
   },
   blue: {
-    primary: "blue",
+    primary: "bg-blue-600",
+    primaryHover: "hover:bg-blue-700",
     secondary: "indigo",
     accent: "sky",
     gradientFrom: "from-blue-400",
@@ -131,7 +135,8 @@ export const themes: Record<ThemeId, ThemeColors> = {
     forgotPasswordHover: "hover:text-blue-200",
   },
   orange: {
-    primary: "orange",
+    primary: "bg-orange-600",
+    primaryHover: "hover:bg-orange-700",
     secondary: "amber",
     accent: "yellow",
     gradientFrom: "from-orange-400",
@@ -159,7 +164,8 @@ export const themes: Record<ThemeId, ThemeColors> = {
     forgotPasswordHover: "hover:text-orange-200",
   },
   rose: {
-    primary: "rose",
+    primary: "bg-rose-600",
+    primaryHover: "hover:bg-rose-700",
     secondary: "pink",
     accent: "fuchsia",
     gradientFrom: "from-rose-400",

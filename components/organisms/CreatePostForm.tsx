@@ -1,41 +1,64 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import TextField from "@/components/atoms/TextField";
 import TextArea from "@/components/atoms/TextArea";
 import PrimaryActionButton from "@/components/molecules/PrimaryActionButton";
 import { useCreatePost } from "@/hooks/useCreatePost";
+import { useUpdatePost } from "@/hooks/useUpdatePost";
 import type { ThemeColors } from "@/lib/themes";
+import type { Post } from "@/components/molecules/PostCard";
 
 interface CreatePostFormProps {
   colors: ThemeColors;
   onSuccess?: () => void;
   onCancel?: () => void;
+  postToEdit?: Post | null;
 }
 
-export default function CreatePostForm({ colors, onSuccess, onCancel }: CreatePostFormProps) {
+export default function CreatePostForm({ colors, onSuccess, onCancel, postToEdit }: CreatePostFormProps) {
   const router = useRouter();
-  const { createPost, isLoading, error } = useCreatePost();
+  const { createPost, isLoading: isCreating, error: createError } = useCreatePost();
+  const { updatePost, isLoading: isUpdating, error: updateError } = useUpdatePost();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+
+  const isEditMode = !!postToEdit;
+  const isLoading = isCreating || isUpdating;
+  const error = createError || updateError;
+
+  // Populate form when editing
+  useEffect(() => {
+    if (postToEdit) {
+      setTitle(postToEdit.title);
+      setContent(postToEdit.content);
+    } else {
+      setTitle("");
+      setContent("");
+    }
+  }, [postToEdit]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const result = await createPost({ title, content });
-
-    if (result?.ok) {
-      // Post created successfully - reset form
-      setTitle("");
-      setContent("");
-
-      // Refresh the server component to fetch new posts
-      router.refresh();
-
-      // Call onSuccess callback if provided (to close modal)
-      if (onSuccess) {
-        onSuccess();
+    if (isEditMode && postToEdit) {
+      const result = await updatePost({ id: postToEdit.id, title, content });
+      if (result?.ok) {
+        router.refresh();
+        if (onSuccess) {
+          onSuccess();
+        }
+      }
+    } else {
+      const result = await createPost({ title, content });
+      if (result?.ok) {
+        setTitle("");
+        setContent("");
+        router.refresh();
+        if (onSuccess) {
+          onSuccess();
+        }
       }
     }
   };
@@ -83,9 +106,9 @@ export default function CreatePostForm({ colors, onSuccess, onCancel }: CreatePo
           type="submit"
           colors={colors}
           isLoading={isLoading}
-          loadingText="Creating post..."
+          loadingText={isEditMode ? "Updating post..." : "Creating post..."}
         >
-          Create Post
+          {isEditMode ? "Update Post" : "Create Post"}
         </PrimaryActionButton>
         {onCancel && (
           <button

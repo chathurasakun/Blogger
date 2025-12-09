@@ -15,16 +15,6 @@ export default async function Home() {
     // tenants will remain empty array, which will show the fallback message
   }
 
-  // Filter to show only tenant A and B
-  // Check both name and domain for flexibility
-  const displayTenants = tenants.filter(
-    (tenant: Tenant) =>
-      tenant.name.toLowerCase().includes("tenanta") ||
-      tenant.name.toLowerCase().includes("tenantb") ||
-      tenant.domain.toLowerCase().includes("tenanta") ||
-      tenant.domain.toLowerCase().includes("tenantb")
-  );
-
   return (
     <main className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-2xl">
@@ -39,8 +29,8 @@ export default async function Home() {
             Choose your workspace to sign in
           </p>
         </div>
-        {displayTenants.length > 0 ? (
-          <TenantSelector tenants={displayTenants} />
+        {tenants.length > 0 ? (
+          <TenantSelector tenants={tenants} />
         ) : (
           <div className="text-center py-8">
             <p className="text-gray-600">

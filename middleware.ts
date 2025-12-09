@@ -1,18 +1,19 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { getTenantByDomain, getAllTenants, Tenant } from "@/lib/tenants";
 
 // Public routes that don't require authentication
 const publicRoutes = ["/tenant/login", "/tenant/signup"];
 
 // Routes that require authentication
-const protectedRoutes = ["/dashboard", "/posts", "/settings"];
+const protectedRoutes = ["/dashboard"];
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const url = req.nextUrl;
   const pathname = url.pathname;
   const hostname = url.hostname; // e.g. tenantA.localhost
 
-  // Extract tenant key from domain (for reference, not used for DB queries in middleware)
-  const tenantKey = getTenantFromDomain(hostname);
+  // Extract tenant key from domain by querying the database
+  const tenantKey = await getTenantFromDomain(hostname);
 
   // Clone headers because req.headers is effectively read‑only
   const requestHeaders = new Headers(req.headers);
@@ -71,10 +72,27 @@ export function middleware(req: NextRequest) {
   });
 }
 
-function getTenantFromDomain(hostname: string) {
-  if (hostname === "tenanta.localhost") return "tenantA";
-  if (hostname === "tenantb.localhost") return "tenantB";
-  return "default";
+async function getTenantFromDomain(hostname: string): Promise<string> {
+  try {
+    // Try exact match first
+    let tenant = await getTenantByDomain(hostname);
+    
+    // If not found, try matching with port variations (e.g., "tenanta.localhost" matches "tenanta.localhost:3004")
+    if (!tenant) {
+      const tenants = await getAllTenants();
+      tenant = tenants.find((t: Tenant) => {
+        const domainWithoutPort = t.domain.split(':')[0];
+        return domainWithoutPort === hostname;
+      }) || null;
+    }
+    
+    // If tenant found, use its name as the key, otherwise default
+    return tenant ? tenant.name : "default";
+  } catch (error) {
+    // If database query fails, fall back to default
+    console.error("Error fetching tenant from domain:", error);
+    return "default";
+  }
 }
 
 // Configure which routes this middleware runs on

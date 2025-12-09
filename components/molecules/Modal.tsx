@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 
 interface ModalProps {
   isOpen: boolean;
@@ -32,7 +33,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       onClick={(e) => {
@@ -49,7 +50,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
       <div className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-slate-900/95 backdrop-blur-xl shadow-2xl">
         {/* Header */}
         <div className="sticky top-0 flex items-center justify-between border-b border-white/10 bg-slate-900/95 backdrop-blur-sm px-6 py-4">
-          <h2 className="text-xl font-semibold">{title}</h2>
+          <h2 className="text-xl font-semibold text-white">{title}</h2>
           <button
             onClick={onClose}
             className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-800 hover:text-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-500"
@@ -76,5 +77,12 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
       </div>
     </div>
   );
+
+  // Use portal to render modal at document body level
+  if (typeof window !== "undefined") {
+    return createPortal(modalContent, document.body);
+  }
+
+  return null;
 }
 

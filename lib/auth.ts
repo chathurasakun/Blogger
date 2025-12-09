@@ -1,11 +1,14 @@
 import { prisma } from "./prisma";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { NextRequest, NextResponse } from "next/server";
+import { getTenantByDomain, Tenant, isUserAdmin } from "./tenants";
+import { getUserById, UserWithTenant } from "./users";
 
 export interface Session {
     id: string;
     userId: string;
     tenantId: string;
-    expiresAt: string;
+    expiresAt: Date;
 }
 
 export async function getSession() {
@@ -42,4 +45,138 @@ export async function createSession(userId: string, tenantId: string) {
   });
 
   return session;
+}
+
+/**
+ * Validates authentication and tenant for API routes.
+ * Returns either an error response or validated session data.
+ */
+export async function validateAuthAndTenant(
+  request: NextRequest
+): Promise<
+  | { error: NextResponse; userId?: never; tenantId?: never; tenant?: never }
+  | { error?: never; userId: string; tenantId: string; tenant: Tenant }
+> {
+  // Check authentication
+  const session = await getSession();
+  if (!session) {
+    return {
+      error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+    };
+  }
+
+  // Extract userId and tenantId with proper type handling
+  const userId = session.userId;
+  const tenantId = session.tenantId;
+
+  // Ensure session has required fields
+  if (!userId || !tenantId) {
+    return {
+      error: NextResponse.json({ error: "Invalid session" }, { status: 401 }),
+    };
+  }
+
+  // Get the current tenant from the domain
+  const host = request.headers.get("host") ?? "";
+  const tenant = host ? await getTenantByDomain(host) : null;
+
+  if (!tenant) {
+    return {
+      error: NextResponse.json(
+        { error: "Invalid tenant domain" },
+        { status: 400 }
+      ),
+    };
+  }
+
+  // Verify session belongs to current tenant
+  if (tenantId !== tenant.id) {
+    return {
+      error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+    };
+  }
+
+  return { userId, tenantId, tenant };
+}
+
+/**
+ * Validates authentication, tenant, and admin role for API routes.
+ * Returns either an error response or validated session data with admin confirmation.
+ */
+export async function validateAuthAndAdmin(
+  request: NextRequest
+): Promise<
+  | { error: NextResponse; userId?: never; tenantId?: never; tenant?: never }
+  | { error?: never; userId: string; tenantId: string; tenant: Tenant }
+> {
+  // First validate basic auth and tenant
+  const authResult = await validateAuthAndTenant(request);
+  if (authResult.error) {
+    return authResult;
+  }
+
+  const { userId, tenantId } = authResult;
+
+  // Check if user is admin
+  const isAdmin = await isUserAdmin(userId, tenantId);
+  if (!isAdmin) {
+    return {
+      error: NextResponse.json(
+        { error: "Forbidden: Admin access required" },
+        { status: 403 }
+      ),
+    };
+  }
+
+  return { userId, tenantId, tenant: authResult.tenant };
+}
+
+/**
+ * Validates all requirements for dashboard access.
+ * Returns either a redirect path if validation fails, or validated data for rendering.
+ */
+export async function validateDashboardAccess(): Promise<
+  | { redirect: string }
+  | {
+      session: Session;
+      tenant: Tenant;
+      user: UserWithTenant;
+      userIsAdmin: boolean;
+    }
+> {
+  const FALLBACK_PATH = "/tenant/login";
+
+  // Check session exists
+  const session = await getSession();
+  if (!session) {
+    return { redirect: FALLBACK_PATH };
+  }
+
+  // Get current tenant from domain
+  const host = headers().get("host") ?? "";
+  const currentTenant = host ? await getTenantByDomain(host) : null;
+  if (!currentTenant) {
+    return { redirect: FALLBACK_PATH };
+  }
+
+  // Verify session belongs to current tenant
+  if (session.tenantId !== currentTenant.id) {
+    return { redirect: FALLBACK_PATH };
+  }
+
+  // Fetch user
+  const user = await getUserById(session.userId);
+  if (!user) {
+    return { redirect: FALLBACK_PATH };
+  }
+
+  // Check if user is admin
+  const userIsAdmin = await isUserAdmin(session.userId, currentTenant.id);
+
+  return {
+    session,
+    tenant: currentTenant,
+    user,
+    userIsAdmin,
+  };
 }

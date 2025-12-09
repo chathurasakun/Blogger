@@ -1,65 +1,56 @@
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
-import { getSession } from "@/lib/auth";
-import { getTenantByDomain } from "@/lib/tenants";
+import { validateDashboardAccess } from "@/lib/auth";
 import { getThemeColors } from "@/lib/themes";
-import { getUserById } from "@/lib/users";
 import { getPostsByTenant } from "@/lib/posts";
 import Header from "@/components/organisms/Header";
-import CreatePostContainer from "@/components/organisms/CreatePostContainer";
-import PostsSection from "@/components/organisms/PostsSection";
+import PostsContainer from "@/components/organisms/PostsContainer";
+import BlogLogo from "@/components/molecules/BlogLogo";
+import AdminBadge from "@/components/molecules/AdminBadge";
 
 export default async function DashboardPage() {
-  const session = await getSession();
+  // Validate all dashboard requirements upfront
+  const validationResult = await validateDashboardAccess();
 
-  if (!session) {
-    redirect("/tenant/login");
+  // If validation fails, redirect to fallback path
+  if ("redirect" in validationResult) {
+    redirect(validationResult.redirect);
   }
 
-  // Get current tenant from domain
-  const host = headers().get("host") ?? "";
-  const currentTenant = host ? await getTenantByDomain(host) : null;
+  // Extract validated data
+  const { tenant, user, userIsAdmin, session } = validationResult;
 
-  if (!currentTenant) {
-    redirect("/tenant/login");
-  }
-
-  // CRITICAL: Verify session belongs to current tenant
-  if (session.tenantId !== currentTenant.id) {
-    // Session belongs to different tenant - invalid for this domain
-    redirect("/tenant/login");
-  }
-
-  // Fetch user and posts in parallel (they don't depend on each other)
-  const [user, posts] = await Promise.all([
-    getUserById(session.userId),
-    getPostsByTenant(currentTenant.id),
-  ]);
-
-  if (!user) {
-    redirect("/tenant/login");
-  }
+  // Fetch posts (user and tenant are already validated)
+  const posts = await getPostsByTenant(tenant.id, session.userId);
 
   // Get theme colors for consistent styling
-  const themeId = currentTenant?.theme || null;
+  const themeId = tenant.theme || null;
   const colors = getThemeColors(themeId);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
-      <Header title="Dashboard" userEmail={user.email} colors={colors} />
+      <Header title="Dashboard" colors={colors} showSettingsLink={userIsAdmin} tenant={tenant} userIsAdmin={userIsAdmin} />
       <main className="mx-auto max-w-7xl px-4 py-8">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold">Welcome back!</h2>
-            <p className="mt-1 text-slate-300">
-              You are logged in as <strong>{user.email}</strong> from{" "}
-              <strong>{user.tenant.name}</strong>.
-            </p>
+        <div className="mb-6">
+          <div className={`mb-4 flex items-center gap-4 p-4 rounded-lg ${userIsAdmin ? 'bg-gradient-to-r from-amber-500/5 via-yellow-500/5 to-amber-500/5 border border-amber-500/20' : ''}`}>
+            <BlogLogo
+              logo={tenant.logo}
+              alt={tenant.blogName || tenant.name || "Blog"}
+            />
+            <div className="flex-1">
+              <h2 className="text-2xl font-semibold">
+                {tenant.blogName || tenant.name}
+              </h2>
+              <div className="mt-1 flex items-center gap-3 flex-wrap">
+                <p className="text-slate-300">
+                  You are logged in as <strong className={`${userIsAdmin ? 'text-amber-200' : 'text-slate-100'}`}>{user.email}</strong>
+                </p>
+                {userIsAdmin && <AdminBadge variant="default" />}
+              </div>
+            </div>
           </div>
-          <CreatePostContainer colors={colors} />
         </div>
 
-        <PostsSection colors={colors} posts={posts} currentUserId={user.id} />
+        <PostsContainer colors={colors} posts={posts} currentUserId={user.id} />
       </main>
     </div>
   );
