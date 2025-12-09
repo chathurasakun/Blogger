@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import TextField from "@/components/atoms/TextField";
 import PrimaryActionButton from "@/components/molecules/PrimaryActionButton";
 import { useUpdateTenantSettings } from "@/hooks/useUpdateTenantSettings";
@@ -184,10 +185,13 @@ export default function SettingsForm({ tenant, colors, onSuccess, onCancel }: Se
           {logoPreview ? (
             <div className="p-6 flex flex-col items-center gap-4">
               <div className="relative">
-                <img
+                <Image
                   src={logoPreview}
                   alt="Logo preview"
+                  width={128}
+                  height={128}
                   className="h-32 w-32 rounded-full object-cover border-2 border-green-500"
+                  unoptimized={logoPreview.startsWith("data:")}
                 />
                 <button
                   type="button"
